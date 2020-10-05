@@ -15,7 +15,6 @@ Add the following snippet to the script section of your `bitbucket-pipelines.yml
     AWS_ACCESS_KEY_ID: '<string>'
     AWS_ACCESS_KEY_ID: '<string>'
     AWS_SECRET_ACCESS_KEY: '<string>'
-    AWS_SECRET_NAME: '<string>'
     AWS_REGION: '<string>'
     AWS_PROFILE: '<string>'
     CONFIG: '<string>'  
@@ -31,7 +30,6 @@ Add the following snippet to the script section of your `bitbucket-pipelines.yml
 | DEPLOY_TAG_VALUE  | Value of the EC2 deploy tag |
 | AWS_ACCESS_KEY_ID (*) | AWS key id. |
 | AWS_SECRET_ACCESS_KEY (*) | AWS secret key. |
-| AWS_SECRET_NAME (*) | The name of the secret. |
 | AWS_REGION (*) | AWS region. |
 | AWS_PROFILE (*) | The name of the AWS profile. eg default, production, non-prod, staging, dev |
 | CONFIG               | Path to AWS config file eg (s3 restricted access) |
@@ -56,7 +54,6 @@ script:
       DEPLOY_TAG_VALUE: 'Ready'
       AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
       AWS_SECRET_ACCESS_KEY: $AWS_SECRET_KEY
-      AWS_SECRET_NAME: sm-s-ew1-project
       AWS_REGION: eu-west-1
       AWS_PROFILE: staging
 ```
