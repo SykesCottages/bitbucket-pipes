@@ -8,7 +8,10 @@ Add the following snippet to the script section of your `bitbucket-pipelines.yml
 
 ```yaml
 - pipe: sykescottages/bitbucket-secrets-manager
-    FILE: '<string>'
+    APPLICATION_TAG: '<string>'
+    APPLICATION_TAG_VALUE: '<string>'
+    DEPLOY_TAG: '<string>'
+    DEPLOY_TAG_VALUE: '<string>'
     AWS_ACCESS_KEY_ID: '<string>'
     AWS_ACCESS_KEY_ID: '<string>'
     AWS_SECRET_ACCESS_KEY: '<string>'
@@ -22,8 +25,11 @@ Add the following snippet to the script section of your `bitbucket-pipelines.yml
 
 | Variable              | Usage                                                       |
 | --------------------- | ----------------------------------------------------------- |
-| FILE             | File Name you Wish you save to. (Default .env)|
-| AWS_ACCESS_KEY_ID (*)              | AWS key id. |
+| APPLICATION_TAG | Name of the EC2 target tag |
+| APPLICATION_TAG_VALUE | Value of the EC2 target tag |
+| DEPLOY_TAG  | Name of the EC2 deploy tag |
+| DEPLOY_TAG_VALUE  | Value of the EC2 deploy tag |
+| AWS_ACCESS_KEY_ID (*) | AWS key id. |
 | AWS_SECRET_ACCESS_KEY (*) | AWS secret key. |
 | AWS_SECRET_NAME (*) | The name of the secret. |
 | AWS_REGION (*) | AWS region. |
@@ -44,6 +50,10 @@ Example pipe yaml
 script:
   - pipe: sykescottages/bitbucket-ec2-instance-tagger
     variables:
+      APPLICATION_TAG: 'Application'
+      APPLICATION_TAG_VALUE: 'Example'
+      DEPLOY_TAG: 'Codedeploy'
+      DEPLOY_TAG_VALUE: 'Ready'
       AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
       AWS_SECRET_ACCESS_KEY: $AWS_SECRET_KEY
       AWS_SECRET_NAME: sm-s-ew1-project

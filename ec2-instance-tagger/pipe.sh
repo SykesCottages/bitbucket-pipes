@@ -110,9 +110,6 @@ tag_instance(){
       echo "DEPLOY_TAG - ${DEPLOY_TAG}:${DEPLOY_TAG_VALUE} added to instance:"${c}
     fi
 
-
-    # aws secretsmanager get-secret-value --secret-id ${SECRET} --query SecretString --output text --region ${REGION}  --profile ${PROFILE}
-    # | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > ${FILE} || { echo 'Failed' ; exit 1; }
 }
 
 completed(){
