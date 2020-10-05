@@ -23,10 +23,10 @@ Add the following snippet to the script section of your `bitbucket-pipelines.yml
 
 | Variable              | Usage                                                       |
 | --------------------- | ----------------------------------------------------------- |
-| APPLICATION_TAG | Name of the EC2 target tag |
-| APPLICATION_TAG_VALUE | Value of the EC2 target tag |
-| DEPLOY_TAG  | Name of the EC2 deploy tag |
-| DEPLOY_TAG_VALUE  | Value of the EC2 deploy tag |
+| APPLICATION_TAG (*)| Name of the EC2 target tag |
+| APPLICATION_TAG_VALUE (*)| Value of the EC2 target tag |
+| DEPLOY_TAG  (*)| Name of the EC2 deploy tag |
+| DEPLOY_TAG_VALUE  (*)| Value of the EC2 deploy tag |
 | AWS_ACCESS_KEY_ID (*) | AWS key id. |
 | AWS_SECRET_ACCESS_KEY (*) | AWS secret key. |
 | AWS_REGION (*) | AWS region. |
