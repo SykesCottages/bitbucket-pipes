@@ -13,7 +13,6 @@ Add the following snippet to the script section of your `bitbucket-pipelines.yml
     DEPLOY_TAG: '<string>'
     DEPLOY_TAG_VALUE: '<string>'
     AWS_ACCESS_KEY_ID: '<string>'
-    AWS_ACCESS_KEY_ID: '<string>'
     AWS_SECRET_ACCESS_KEY: '<string>'
     AWS_REGION: '<string>'
     AWS_PROFILE: '<string>'
