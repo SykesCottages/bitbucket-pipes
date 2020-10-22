@@ -6,5 +6,6 @@ This is a repository containing all the bespoke pipes we currently use for the B
 Our pipes:
  - [Secrets Manager](https://github.com/SykesCottages/bitbucket-pipes/blob/master/secrets-manager/README.md)
  - [EC2 Instance Tagger](https://github.com/SykesCottages/bitbucket-pipes/tree/master/ec2-instance-tagger/README.md)
+ - [New Relic Deployment Marker](https://github.com/SykesCottages/bitbucket-pipes/tree/master/new-relic-deployment-marker/README.md)
 
 The images can be found on [Dockerhub](https://hub.docker.com/repository/docker/sykescottages/bitbucket-pipes)
