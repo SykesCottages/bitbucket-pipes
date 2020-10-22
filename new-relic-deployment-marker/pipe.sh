@@ -15,4 +15,4 @@ NEW_RELIC_REGION=${NEW_RELIC_REGION:='US'}
 newrelic apm deployment create \
   --applicationId "${NEW_RELIC_APPLICATION_ID}" \
   --user "${DEPLOYMENT_USER}" \
-  --revision "${NEW_RELIC_DEPLOYMENT_REVISION}"
+  --revision "${DEPLOYMENT_REVISION}"
