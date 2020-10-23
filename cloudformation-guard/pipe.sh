@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+## Required Parameters
+CLOUDFORMATION_RULESET_FILE=${CLOUDFORMATION_RULESET_FILE}
+CLOUDFORMATION_TEMPLATE_FILE=${CLOUDFORMATION_TEMPLATE_FILE}
+
+./cfn-guard check \
+  --rule_set "${CLOUDFORMATION_RULESET_FILE}" \
+  --template "${CLOUDFORMATION_TEMPLATE_FILE}"
