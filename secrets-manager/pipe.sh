@@ -15,7 +15,7 @@ DEBUG=${DEBUG:=false}
 
 
 create_config(){
-  mkdir aws
+  mkdir -p aws
   curl "${CONFIG}" > aws/config
 }
 
