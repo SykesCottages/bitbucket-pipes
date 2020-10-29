@@ -92,7 +92,6 @@ ecs_deploy(){
 
     envsubst < task-definition.json >  task-definition-envsubst.json
     # Update the task definition and capture the latest revision.
-    >
     export UPDATED_TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://task-definition-envsubst.json | \
     jq '.taskDefinition.taskDefinitionArn' --raw-output)
     
