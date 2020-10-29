@@ -86,7 +86,7 @@ create_credentials(){
 ecs_deploy(){
     export AWS_CONFIG_FILE=aws/config
     export AWS_SHARED_CREDENTIALS_FILE=aws/credentials
-    AWS_ECR_URL=".dkr.ecr.eu-west-1.amazonaws.com"
+    AWS_ECR_URL="dkr.ecr.eu-west-1.amazonaws.com"
     # Replace the container name in the task definition with the new image.
     export IMAGE_NAME="${AWS_ECR_ACCOUNT_ID}.${AWS_ECR_URL}/${AWS_ECR_IMAGE_NAME}:${BITBUCKET_BUILD_NUMBER}"
 
