@@ -86,7 +86,7 @@ dockerLogin(){
 pushImages(){
   docker images
   IMAGES=$(docker images | grep -i ${BITBUCKET_BUILD_NUMBER})
-  AWS_ECR_URL=".dkr.ecr.eu-west-1.amazonaws.com"
+  AWS_ECR_URL="dkr.ecr.eu-west-1.amazonaws.com"
   export FULL_IMAGE_NAME="${ACCOUNT}.${AWS_ECR_URL}/${IMAGE}"
   if [ -z "$IMAGES" ];then
     echo "[INFO] - IMAGE_ID is empty"
