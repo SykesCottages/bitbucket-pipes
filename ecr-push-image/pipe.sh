@@ -6,8 +6,8 @@ set -o pipefail
 # required parameters
 ACCESS=${AWS_ACCESS_KEY_ID}
 KEY=${AWS_SECRET_ACCESS_KEY}
-IMAGE=${IMAGE_NAME}
 ACCOUNT=${AWS_ECR_ACCOUNT_ID}
+IMAGE=${IMAGE_NAME}
 REGION=${AWS_REGION}
 PROFILE=${AWS_PROFILE}
 CONFIG=${CONFIG:='https://s3-auth-ew1-bitbucket-secrets-manager-bucket-config.s3-eu-west-1.amazonaws.com/config'}
@@ -84,18 +84,19 @@ dockerLogin(){
 }
 
 pushImages(){
+  docker images
   IMAGES=$(docker images | grep -i ${BITBUCKET_BUILD_NUMBER})
-
+  AWS_ECR_URL=".dkr.ecr.eu-west-1.amazonaws.com"
+  export FULL_IMAGE_NAME="${ACCOUNT}.${AWS_ECR_URL}/${IMAGE}"
   if [ -z "$IMAGES" ];then
     echo "[INFO] - IMAGE_ID is empty"
     exit 2
   else
     echo "[INFO] - Preparing to publish image..."
     # docker-compose -f $DOCKER_COMPOSE_FILE push
-    docker images
     echo "[INFO] - Tagging image latest ..."
-    docker tag ${IMAGE}:${BITBUCKET_BUILD_NUMBER} ${IMAGE}:latest
-    docker push ${IMAGE}:latest
+    docker tag ${IMAGE_NAME} ${FULL_IMAGE_NAME}:${BITBUCKET_BUILD_NUMBER}
+    docker push ${FULL_IMAGE_NAME}:${BITBUCKET_BUILD_NUMBER}
   fi
 }
 
