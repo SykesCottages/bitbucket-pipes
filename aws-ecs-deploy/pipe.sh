@@ -92,10 +92,11 @@ ecs_deploy(){
 
     envsubst < task-definition.json >  task-definition-envsubst.json
     # Update the task definition and capture the latest revision.
-    export UPDATED_TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://task-definition-envsubst.json | \
+    export AWS="aws --profile $PROFILE --region $REGION"
+    export UPDATED_TASK_DEFINITION=$($AWS ecs register-task-definition --cli-input-json file://task-definition-envsubst.json | \
     jq '.taskDefinition.taskDefinitionArn' --raw-output)
     
-    aws ecs update-service --service ${SERVICE} --cluster ${CLUSTER} --output table -region ${REGION} --profile ${PROFILE} --task-definition ${UPDATED_TASK_DEFINITION} || { echo 'Failed' ; exit 1; }
+    $AWS ecs update-service --service ${SERVICE} --cluster ${CLUSTER} --output table --task-definition ${UPDATED_TASK_DEFINITION} || { echo 'Failed' ; exit 1; }
 }
 
 create_config
