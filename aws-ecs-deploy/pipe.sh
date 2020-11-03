@@ -15,11 +15,7 @@ IMAGE=${AWS_ECR_IMAGE_NAME}
 
 CONFIG=${CONFIG:='https://s3-auth-ew1-bitbucket-secrets-manager-bucket-config.s3-eu-west-1.amazonaws.com/config'}
 
-OK=$(echo "[OK] - ")
-ERROR=$(echo "[ERROR] - ")
-INFO=$(echo "[INFO] - ")
-TIMEOUT=300
-AWS="aws --profile $PROFILE --region $REGION"
+
 
 create_config(){
   mkdir -p aws
@@ -107,6 +103,10 @@ waitForDeploy(){
   DEPLOYMENT_SUCCESS="false"
   every=2
   i=0
+  OK=$(echo "[OK] - ")
+  ERROR=$(echo "[ERROR] - ")
+  INFO=$(echo "[INFO] - ")
+  TIMEOUT=300
   echo "Waiting for service deployment to complete..."
   while [ $i -lt $TIMEOUT ]
   do
