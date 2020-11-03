@@ -97,10 +97,10 @@ ecs_deploy(){
 
     envsubst < task-definition.json >  task-definition-envsubst.json
     # Update the task definition and capture the latest revision.
-    export UPDATED_TASK_DEFINITION=$($AWS ecs register-task-definition --cli-input-json file://task-definition-envsubst.json | \
+    export UPDATED_TASK_DEFINITION=$(aws --profile $PROFILE --region $REGION ecs register-task-definition --cli-input-json file://task-definition-envsubst.json | \
     jq '.taskDefinition.taskDefinitionArn' --raw-output)
     
-    $AWS ecs update-service --service ${SERVICE} --cluster ${CLUSTER} --output table --task-definition ${UPDATED_TASK_DEFINITION} || { echo 'Failed' ; exit 1; }
+    aws --profile $PROFILE --region $REGION ecs update-service --service ${SERVICE} --cluster ${CLUSTER} --output table --task-definition ${UPDATED_TASK_DEFINITION} || { echo 'Failed' ; exit 1; }
 }
 
 waitForDeploy(){
@@ -110,7 +110,7 @@ waitForDeploy(){
   echo "Waiting for service deployment to complete..."
   while [ $i -lt $TIMEOUT ]
   do
-    NUM_DEPLOYMENTS=$($AWS ecs describe-services --cluster ${CLUSTER} --service ${SERVICE}| jq "[.services[].deployments[]] | length")
+    NUM_DEPLOYMENTS=$(aws --profile $PROFILE --region $REGION ecs describe-services --cluster ${CLUSTER} --service ${SERVICE}| jq "[.services[].deployments[]] | length")
     # Wait to see if more than 1 deployment stays running
     # If the wait time has passed, we need to roll back
     if [ $NUM_DEPLOYMENTS -eq 1 ]; then
