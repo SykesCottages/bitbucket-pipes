@@ -15,6 +15,11 @@ IMAGE=${AWS_ECR_IMAGE_NAME}
 
 CONFIG=${CONFIG:='https://s3-auth-ew1-bitbucket-secrets-manager-bucket-config.s3-eu-west-1.amazonaws.com/config'}
 
+OK=$(echo "[OK] - ")
+ERROR=$(echo "[ERROR] - ")
+INFO=$(echo "[INFO] - ")
+TIMEOUT=300
+AWS="aws --profile $PROFILE --region $REGION"
 
 create_config(){
   mkdir -p aws
@@ -92,11 +97,36 @@ ecs_deploy(){
 
     envsubst < task-definition.json >  task-definition-envsubst.json
     # Update the task definition and capture the latest revision.
-    export AWS="aws --profile $PROFILE --region $REGION"
     export UPDATED_TASK_DEFINITION=$($AWS ecs register-task-definition --cli-input-json file://task-definition-envsubst.json | \
     jq '.taskDefinition.taskDefinitionArn' --raw-output)
     
     $AWS ecs update-service --service ${SERVICE} --cluster ${CLUSTER} --output table --task-definition ${UPDATED_TASK_DEFINITION} || { echo 'Failed' ; exit 1; }
+}
+
+waitForDeploy(){
+  DEPLOYMENT_SUCCESS="false"
+  every=2
+  i=0
+  echo "Waiting for service deployment to complete..."
+  while [ $i -lt $TIMEOUT ]
+  do
+    NUM_DEPLOYMENTS=$($AWS ecs describe-services --cluster ${CLUSTER} --service ${SERVICE}| jq "[.services[].deployments[]] | length")
+    # Wait to see if more than 1 deployment stays running
+    # If the wait time has passed, we need to roll back
+    if [ $NUM_DEPLOYMENTS -eq 1 ]; then
+      echo -e "${OK} Service deployment successful. Time = ${i} seconds"
+      DEPLOYMENT_SUCCESS="true"
+      # Exit the loop.
+      i=$TIMEOUT
+    else
+      sleep $every
+      i=$(( $i + $every ))
+    fi
+  done
+  if [[ "${DEPLOYMENT_SUCCESS}" != "true" ]]; then
+    echo -e "${ERROR} failed to deploy."
+    exit 1
+  fi
 }
 
 create_config
@@ -104,4 +134,4 @@ check_variables
 start
 create_credentials
 ecs_deploy
-
+waitForDeploy
