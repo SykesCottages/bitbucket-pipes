@@ -11,6 +11,7 @@ PROFILE=${AWS_PROFILE}
 SERVICE=${AWS_ECS_SERVICE_NAME}
 CLUSTER=${AWS_ECS_CLUSTER_NAME}
 ACCOUNT=${AWS_ECR_ACCOUNT_ID}
+TASK=$TASK_DEFINITION_PATH}
 IMAGE=${AWS_ECR_IMAGE_NAME}
 
 CONFIG=${CONFIG:='https://s3-auth-ew1-bitbucket-secrets-manager-bucket-config.s3-eu-west-1.amazonaws.com/config'}
@@ -69,6 +70,10 @@ check_variables(){
     exit 1
   fi
 
+  if ! [ -n "${TASK}" ]; then
+    echo "Provid the task definition"
+    exit 1
+  fi
 
 }
 
@@ -91,7 +96,7 @@ ecs_deploy(){
     # Replace the container name in the task definition with the new image.
     export IMAGE_NAME="${AWS_ECR_ACCOUNT_ID}.${AWS_ECR_URL}/${AWS_ECR_IMAGE_NAME}:${BITBUCKET_BUILD_NUMBER}"
 
-    envsubst < task-definition.json >  task-definition-envsubst.json
+    envsubst < ${TASK} >  task-definition-envsubst.json
     # Update the task definition and capture the latest revision.
     export UPDATED_TASK_DEFINITION=$(aws --profile $PROFILE --region $REGION ecs register-task-definition --cli-input-json file://task-definition-envsubst.json | \
     jq '.taskDefinition.taskDefinitionArn' --raw-output)
@@ -129,6 +134,7 @@ waitForDeploy(){
   fi
 }
 
+aws --profile staging --region eu-west-1 ecs describe-services --cluster fargate-e-ew1-holmes --service service-f-e-ew1-holmes| jq "[.services[].deployments[]] | length"
 create_config
 check_variables
 start
