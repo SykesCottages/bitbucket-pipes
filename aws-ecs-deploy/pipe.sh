@@ -65,13 +65,14 @@ check_variables(){
     exit 1
   fi
 
-  if ! [ -n "${IMAGE}" ]; then
-    echo "Provid the AWS ECR image name"
-    exit 1
-  fi
 
   if ! [ -n "${TASK}" ]; then
     echo "Provid the task definition"
+    exit 1
+  fi
+
+  if ! [ -n "${IMAGE}" ]; then
+    echo "Provid the AWS ECR image name"
     exit 1
   fi
 
