@@ -135,7 +135,6 @@ waitForDeploy(){
   fi
 }
 
-aws --profile staging --region eu-west-1 ecs describe-services --cluster fargate-e-ew1-holmes --service service-f-e-ew1-holmes| jq "[.services[].deployments[]] | length"
 create_config
 check_variables
 start
