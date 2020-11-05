@@ -98,9 +98,13 @@ ecs_deploy(){
     export IMAGE_NAME="${AWS_ECR_ACCOUNT_ID}.${AWS_ECR_URL}/${AWS_ECR_IMAGE_NAME}:${BITBUCKET_BUILD_NUMBER}"
 
     envsubst < ${TASK} >  task-definition-envsubst.json
+
+    cat task-definition-envsubst.json
     # Update the task definition and capture the latest revision.
     export UPDATED_TASK_DEFINITION=$(aws --profile $PROFILE --region $REGION ecs register-task-definition --cli-input-json file://task-definition-envsubst.json | \
     jq '.taskDefinition.taskDefinitionArn' --raw-output)
+
+    echo $UPDATED_TASK_DEFINITION 
     
     aws --profile $PROFILE --region $REGION ecs update-service --service ${SERVICE} --cluster ${CLUSTER} --output table --task-definition ${UPDATED_TASK_DEFINITION} || { echo 'Failed' ; exit 1; }
 }
