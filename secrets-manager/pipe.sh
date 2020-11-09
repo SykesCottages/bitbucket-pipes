@@ -16,7 +16,12 @@ DEBUG=${DEBUG:=false}
 
 create_config(){
   mkdir -p aws
-  curl "${CONFIG}" > aws/config
+
+  if [ ! -f "aws/config" ]; then
+    curl "${CONFIG}" > aws/config
+  else
+    echo 'AWS Config already exists' >&2
+  fi
 }
 
 check_variables(){
@@ -59,10 +64,15 @@ start(){
 
 create_credentials(){
 
-  echo -e "[auth] \n
-      aws_access_key_id = ${ACCESS} \n
-      aws_secret_access_key = ${KEY} \n
-      " > aws/credentials
+ if [ ! -f "aws/credentials" ]; then
+    echo -e "[auth] \n
+        aws_access_key_id = ${ACCESS} \n
+        aws_secret_access_key = ${KEY} \n
+        " > aws/credentials
+  else
+    echo 'AWS Credentials already exists' >&2
+  fi
+  
 }
 
 get_secrets(){
@@ -91,9 +101,14 @@ completed(){
   fi
 }
 
+cleaup_credentials(){
+  rm -r aws
+}
+
 create_config
 check_variables
 start
 create_credentials
 get_secrets
+cleaup_credentials
 completed
