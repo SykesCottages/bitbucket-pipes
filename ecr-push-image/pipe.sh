@@ -111,9 +111,16 @@ pushImages(){
   fi
 }
 
+
+cleaup_credentials(){
+  echo "Tidying up after Pipe"
+  rm -r aws
+}
+
 create_config
 check_variables
 start
 create_credentials
 dockerLogin
 pushImages
+cleaup_credentials
