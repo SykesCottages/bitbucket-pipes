@@ -90,7 +90,7 @@ start(){
 
 create_credentials(){
 
-  if [ ! -f "aws/Credentials" ]; then
+  if [ ! -f "aws/credentials" ]; then
     echo -e "[auth] \n
         aws_access_key_id = ${ACCESS} \n
         aws_secret_access_key = ${KEY} \n
