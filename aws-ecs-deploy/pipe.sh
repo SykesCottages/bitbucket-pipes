@@ -117,7 +117,7 @@ ecs_deploy(){
 
     echo $UPDATED_TASK_DEFINITION 
     
-    aws --profile $PROFILE --region $REGION ecs update-service --service ${SERVICE} --cluster ${CLUSTER} --output text --force-new-deployment --task-definition ${UPDATED_TASK_DEFINITION} || { echo 'Failed' ; exit 1; }
+    aws --profile $PROFILE --region $REGION ecs update-service --service ${SERVICE} --cluster ${CLUSTER} --output text --task-definition ${UPDATED_TASK_DEFINITION} || { echo 'Failed' ; exit 1; }
 }
 
 waitForDeploy(){
