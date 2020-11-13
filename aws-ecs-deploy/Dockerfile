@@ -4,6 +4,6 @@ RUN yum install jq -y
 
 RUN yum install gettext -y
 
-COPY pipe.sh /
+COPY ecs-deploy /
 
-ENTRYPOINT ["/pipe.sh" ]
+ENTRYPOINT ["/ecs-deploy" ]
