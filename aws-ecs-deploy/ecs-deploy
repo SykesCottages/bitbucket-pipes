@@ -11,7 +11,7 @@ AWS_ASSUME_ROLE=false
 IMAGE=false
 MIN=false
 MAX=false
-TIMEOUT=90
+TIMEOUT=120
 VERBOSE=false
 TAGVAR=false
 TAGONLY=""
@@ -26,11 +26,10 @@ RUN_TASK_LAUNCH_TYPE=false
 RUN_TASK_NETWORK_CONFIGURATION=false
 RUN_TASK_WAIT_FOR_SUCCESS=false
 
+
 function usage() {
     cat <<EOM
 ##### ecs-deploy #####
-Simple script for triggering blue/green deployments on Amazon Elastic Container Service
-https://github.com/silinternational/ecs-deploy
 
 One of the following is required:
     -n | --service-name          Name of service to deploy
@@ -300,9 +299,9 @@ function parseImageName() {
     fi
 
     # If in test mode output $useImage
-    if [ "$BASH_SOURCE" != "$0" ]; then
+
       echo $useImage
-    fi
+
 }
 
 function getCurrentTaskDefinition() {
@@ -376,9 +375,8 @@ function createNewTaskDefJson() {
     NEW_DEF=$(echo "$DEF" | jq "{${NEW_DEF_JQ_FILTER}}")
 
     # If in test mode output $NEW_DEF
-    if [ "$BASH_SOURCE" != "$0" ]; then
       echo "$NEW_DEF"
-    fi
+
 }
 
 function registerNewTaskDefinition() {
@@ -571,6 +569,7 @@ function runTask {
 
 }
 
+
 ######################################################
 # When not being tested, run application as expected #
 ######################################################
@@ -580,7 +579,8 @@ if [ "$BASH_SOURCE" == "$0" ]; then
     set -u
     set -e
     # If no args are provided, display usage information
-    if [ $# == 0 ]; then usage; fi
+    # Bitbucket Pipe Sets Environment Variables
+    # if [ $# == 0 ]; then usage; fi
 
     # Check for AWS, AWS Command Line Interface
     require aws
