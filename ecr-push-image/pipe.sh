@@ -123,4 +123,4 @@ start
 create_credentials
 dockerLogin
 pushImages
-cleaup_credentials
+# cleaup_credentials
