@@ -8,6 +8,7 @@ ACCESS=${AWS_ACCESS_KEY_ID}
 KEY=${AWS_SECRET_ACCESS_KEY}
 ACCOUNT=${AWS_ECR_ACCOUNT_ID}
 IMAGE=${IMAGE_NAME}
+IMAGE_TAG=${IMAGE_TAG}
 REGION=${AWS_REGION}
 PROFILE=${AWS_PROFILE}
 CONFIG=${CONFIG:='https://s3-auth-ew1-bitbucket-secrets-manager-bucket-config.s3-eu-west-1.amazonaws.com/config'}
@@ -96,7 +97,7 @@ dockerLogin(){
 
 pushImages(){
   docker images
-  IMAGES=$(docker images | grep -i ${BITBUCKET_BUILD_NUMBER})
+  IMAGES=$(docker images | grep -i ${IMAGE_TAG})
   AWS_ECR_URL="dkr.ecr.eu-west-1.amazonaws.com"
   export FULL_IMAGE_NAME="${ACCOUNT}.${AWS_ECR_URL}/${IMAGE}"
   if [ -z "$IMAGES" ];then
@@ -106,8 +107,8 @@ pushImages(){
     echo "[INFO] - Preparing to publish image..."
     # docker-compose -f $DOCKER_COMPOSE_FILE push
     echo "[INFO] - Tagging image latest ..."
-    docker tag ${IMAGE_NAME} ${FULL_IMAGE_NAME}:${BITBUCKET_BUILD_NUMBER}
-    docker push ${FULL_IMAGE_NAME}:${BITBUCKET_BUILD_NUMBER}
+    docker tag ${IMAGE_NAME} ${FULL_IMAGE_NAME}:${IMAGE_TAG}
+    docker push ${FULL_IMAGE_NAME}:${IMAGE_TAG}
   fi
 }
 
