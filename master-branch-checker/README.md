@@ -7,5 +7,5 @@ Check if current branch is behind current master by a few commits and prevents e
 Add the following snippet to the script section of your `bitbucket-pipelines.yml` file:
 
 ```yaml
-- pipe: sykescottages/master-branch-checker
+- pipe: docker://sykescottages/bitbucket-pipes:master-branch-checker
 ```
