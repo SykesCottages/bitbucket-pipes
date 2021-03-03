@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 DIFF_FROM_MASTER=$(git rev-list --left-right --count HEAD...origin/master|awk '{print $2}')
 
