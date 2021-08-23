@@ -1,14 +1,15 @@
-# Bitbucket EC2 Instance Tagger
+# Hello World
 
-Tag running AWS EC2 Instance ready for deployment in Bitbucket pipeline.
+Just a hello world script to help me test the end to end process of writing, updating and deploying a pipe
 
 ## YAML Definition
 
 Add the following snippet to the script section of your `bitbucket-pipelines.yml` file:
 
 ```yaml
-- pipe: sykescottages/hello-world
-    THING_TO_ECHO: '<string>'
+- pipe: docker://sykescottages/bitbucket-pipes:hello-world    
+    variables:
+        THING_TO_ECHO: '<string>'
 ```
 
 ## Variables
@@ -23,7 +24,7 @@ Example pipe yaml
 
 ```yaml
 script:
-  - pipe: sykescottages/hello-world
+    - pipe: docker://sykescottages/bitbucket-pipes:hello-world
     variables:
       THING_TO_ECHO: "Hello World"
 ```
