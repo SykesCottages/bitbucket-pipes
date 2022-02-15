@@ -6,7 +6,7 @@ Mark new deployments in New Relic with this Bitbucket Pipe
 Add the following snippet to the script section of your `bitbucket-pipelines.yml` file:
 
 ```yaml
-- pipe: sykescottages/new-relic-deployment-marker
+- pipe: docker://sykescottages/bitbucket-pipes:new-relic-deployment-marker
     NEW_RELIC_API_KEY: '<string>'
     NEW_RELIC_APPLICATION_ID: '<string>'
     NEW_RELIC_REGION: '<string>'
