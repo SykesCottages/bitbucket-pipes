@@ -12,7 +12,13 @@ DEPLOYMENT_REVISION=${DEPLOYMENT_REVISION}
 DEPLOYMENT_USER=${DEPLOYMENT_USER:='bitbucket.pipeline'}
 NEW_RELIC_REGION=${NEW_RELIC_REGION:='US'}
 
-newrelic apm deployment create \
-  --applicationId "${NEW_RELIC_APPLICATION_ID}" \
-  --user "${DEPLOYMENT_USER}" \
-  --revision "${DEPLOYMENT_REVISION}"
+OLD_IFS=$IFS
+IFS=,
+for APP in $NEW_RELIC_APPLICATION_ID; do
+  newrelic apm deployment create \
+    --applicationId "${APP}" \
+    --user "${DEPLOYMENT_USER}" \
+    --revision "${DEPLOYMENT_REVISION}"
+done
+IFS=$OLD_IFS
+
