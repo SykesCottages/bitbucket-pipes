@@ -79,7 +79,7 @@ get_secrets(){
     export AWS_CONFIG_FILE=aws/config
     export AWS_SHARED_CREDENTIALS_FILE=aws/credentials
 
-  aws secretsmanager get-secret-value --secret-id ${SECRET} --query SecretString --output text --region ${REGION}  --profile ${PROFILE} | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > ${FILE} || { echo 'Failed' ; exit 1; }
+  aws secretsmanager get-secret-value --secret-id ${SECRET} --query SecretString --output text --region ${REGION}  --profile ${PROFILE} | jq -r 'to_entries|map("\(.key)=\"\(.value|tostring)\"")|.[]' > ${FILE} || { echo 'Failed' ; exit 1; }
 }
 
 completed(){
