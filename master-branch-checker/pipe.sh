@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-BRANCH_NAME=$(git branch | cut -c 3- | grep -E '^master$|^main$')
+BRANCH_NAME=$(git branch -r | grep -Po 'HEAD -> .*/\K.*$')
 
 DIFF_FROM_MASTER=$(git rev-list --left-right --count HEAD...origin/$BRANCH_NAME|awk '{print $2}')
 
