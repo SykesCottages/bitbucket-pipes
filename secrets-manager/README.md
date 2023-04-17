@@ -1,56 +1,60 @@
 # Bitbucket Secrets Manager
 
-Access AWS secrets manager in Bitbucket pipeline.
+Access AWS Secrets Manager in Bitbucket pipeline.
+
 
 ## YAML Definition
 
 Add the following snippet to the script section of your `bitbucket-pipelines.yml` file:
 
 ```yaml
-- pipe: sykescottages/bitbucket-secrets-manager
-    FILE: '<string>'
-    AWS_ACCESS_KEY_ID: '<string>'
-    AWS_ACCESS_KEY_ID: '<string>'
-    AWS_SECRET_ACCESS_KEY: '<string>'
-    AWS_SECRET_NAME: '<string>'
-    AWS_REGION: '<string>'
-    AWS_PROFILE: '<string>'
-    CONFIG: '<string>'  
+  - pipe: sykescottages/bitbucket-pipes:secrets-manager-v2
+    variables:
+      FILE: '.env'
+      AWS_ACCESS_KEY_ID: '<string>'
+      AWS_SECRET_ACCESS_KEY: '<string>'
+      AWS_OIDC_ROLE_ARN: $AWS_OIDC_ROLE_ARN
+      AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+      AWS_SECRET_NAME: $AWS_SECRET_NAME
 ```
 
 ## Variables
 
-| Variable              | Usage                                                       |
-| --------------------- | ----------------------------------------------------------- |
-| FILE             | File Name you Wish you save to. (Default .env)|
-| AWS_ACCESS_KEY_ID (*)              | AWS key id. |
-| AWS_SECRET_ACCESS_KEY (*) | AWS secret key. |
-| AWS_SECRET_NAME (*) | The name of the secret. |
-| AWS_REGION (*) | AWS region. |
-| AWS_PROFILE (*) | The name of the AWS profile. eg default, production, non-prod, staging, dev |
-| CONFIG               | Path to AWS config file eg (s3 restricted access) |
-_(*) = required variable. This variable needs to be specified always when using the pipe._
+| Variable                         | Usage                                              |
+|----------------------------------|----------------------------------------------------|
+| FILE                             | File Name you wish you save to. (defaults to .env) |
+| AWS_ACCESS_KEY_ID (Optional)     | AWS Access Key Id.                                 |
+| AWS_OIDC_ROLE_ARN (Optional)     | AWS OIDC Arn                                       |
+| AWS_SECRET_ACCESS_KEY (Optional) | AWS Secret Key.                                    |
+| AWS_SECRET_NAME (*)              | The name of the Secret Manager resource.           |
+| AWS_DEFAULT_REGION (*)           | AWS Default Region.                                |
 
-#### Workspaces Variables
-- $AWS_ACCESS_KEY
-- $AWS_SECRET_KEY
+(*) = required variable. This variable needs to be specified always when using the pipe.
+You must either pass in the OIDC Role Arn, or the AWS Access Key Id and Secret Key
 
 ## Prerequisites
 
-To use this pipe you should have AWS secrets manager setup.
+To use this pipe you should have AWS Secrets Manager setup.
+If using OIDC, the bitbucket pipelines step must declare the `oidc: true` parameter.
 
 ## Examples
 
 Example pipe yaml
 
 ```yaml
-script:
-  - pipe: sykescottages/bitbucket-secrets-manager
-    variables:
-      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY
-      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_KEY
-      AWS_SECRET_NAME: sm-s-ew1-project
-      AWS_REGION: eu-west-1
-      AWS_PROFILE: staging
+    - step: &deploy
+        image: node:latest
+        oidc: true
+        caches:
+          - node
+          - docker
+        script:
+          - pipe: docker://sykescottages/bitbucket-pipes:secrets-manager-v2
+            variables:
+              FILE: '.env'
+              AWS_OIDC_ROLE_ARN: $AWS_OIDC_ROLE_ARN
+              AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+              AWS_SECRET_NAME: $AWS_SECRET_NAME
+          - ./deploy.sh
 ```
 
