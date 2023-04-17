@@ -6,14 +6,14 @@
 #   AWS_ACCESS_KEY_ID
 #   AWS_SECRET_ACCESS_KEY
 #   AWS_DEFAULT_REGION
-#   AWS_SECRET_MANAGER
+#   AWS_SECRET_NAME
 #   FILE
 
 source "$(dirname "$0")/common.sh"
 
 # mandatory parameters
 AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:?'AWS_DEFAULT_REGION variable missing.'}
-AWS_SECRET_MANAGER=${AWS_SECRET_MANAGER:?'AWS_SECRET_MANAGER variable missing.'}
+AWS_SECRET_NAME=${AWS_SECRET_NAME:?'AWS_SECRET_NAME variable missing.'}
 FILE=${FILE:?'.env'}
 
 
@@ -55,7 +55,7 @@ setup_authentication
 info "Getting values from Secret Manager..."
 
 # Pipe standard output to /dev/null so run does not echo out secrets
-run aws secretsmanager get-secret-value --region ${AWS_DEFAULT_REGION} --secret-id ${AWS_SECRET_MANAGER} --query SecretString --output text 1> /dev/null
+run aws secretsmanager get-secret-value --region ${AWS_DEFAULT_REGION} --secret-id ${AWS_SECRET_NAME} --query SecretString --output text 1> /dev/null
 
 if [[ "${status}" -eq 0 ]]; then
   for s in $(cat ${output_file} | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
