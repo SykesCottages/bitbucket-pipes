@@ -1,8 +1,0 @@
-credentials
-config
-.env
-.DS_Store
-aws
-
-.terraform
-_provider.tf

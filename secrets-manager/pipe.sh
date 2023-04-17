@@ -1,114 +1,74 @@
 #!/usr/bin/env bash
+#
+# Get values from Secret Manager
+#
+# Required globals:
+#   AWS_ACCESS_KEY_ID
+#   AWS_SECRET_ACCESS_KEY
+#   AWS_DEFAULT_REGION
+#   AWS_SECRET_MANAGER
+#   FILE
 
-set -e
-set -o pipefail
+source "$(dirname "$0")/common.sh"
 
-# required parameters
-FILE=${FILE:=.env}
-ACCESS=${AWS_ACCESS_KEY_ID}
-KEY=${AWS_SECRET_ACCESS_KEY}
-SECRET=${AWS_SECRET_NAME}
-REGION=${AWS_REGION}
-PROFILE=${AWS_PROFILE}
-CONFIG=${CONFIG:='https://s3-auth-ew1-bitbucket-secrets-manager-bucket-config.s3-eu-west-1.amazonaws.com/config'}
-DEBUG=${DEBUG:=false}
+# mandatory parameters
+AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:?'AWS_DEFAULT_REGION variable missing.'}
+AWS_SECRET_MANAGER=${AWS_SECRET_MANAGER:?'AWS_SECRET_MANAGER variable missing.'}
+FILE=${FILE:?'.env'}
 
 
-create_config(){
-  mkdir -p aws
-
-  if [ ! -f "aws/config" ]; then
-    curl "${CONFIG}" > aws/config
-  else
-    echo 'AWS Config already exists' >&2
-  fi
+default_authentication() {
+  info "Using default authentication with AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY."
+  AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:?'AWS_ACCESS_KEY_ID variable missing.'}
+  AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:?'AWS_SECRET_ACCESS_KEY variable missing.'}
 }
 
-check_variables(){
-
-  if [ ! -e aws/config ]; then
-    echo "Cant not access the AWS Config file."
-    exit 1
-  fi
-
-  if ! [ -n "${ACCESS}" ]; then
-    echo "Set the AWS access key."
-    exit 1
-  fi
-
-  if ! [ -n "${KEY}" ]; then
-    echo "Set the AWS Secret key."
-    exit 1
-  fi
-
-  if ! [ -n "${SECRET}" ]; then
-    echo "Provid The name of the AWS secrest"
-    exit 1
-  fi
-
-  if ! [ -n "${REGION}" ]; then
-    echo "Provid the AWS Region"
-    exit 1
-  fi
-
-  if ! [ -n "${PROFILE}" ]; then
-    echo "Provid the AWS IAM profile"
-    exit 1
-  fi
-
+oidc_authentication() {
+  info "Authenticating with a OpenID Connect (OIDC) Web Identity Provider."
+      mkdir -p /.aws-oidc
+      AWS_WEB_IDENTITY_TOKEN_FILE=/.aws-oidc/web_identity_token
+      echo "${BITBUCKET_STEP_OIDC_TOKEN}" >> ${AWS_WEB_IDENTITY_TOKEN_FILE}
+      chmod 400 ${AWS_WEB_IDENTITY_TOKEN_FILE}
+      aws configure set web_identity_token_file ${AWS_WEB_IDENTITY_TOKEN_FILE}
+      aws configure set role_arn ${AWS_OIDC_ROLE_ARN}
+      unset AWS_ACCESS_KEY_ID
+      unset AWS_SECRET_ACCESS_KEY
 }
 
-start(){
-  echo "Getting Secret"
-}
-
-create_credentials(){
-
- if [ ! -f "aws/credentials" ]; then
-    echo -e "[auth] \n
-        aws_access_key_id = ${ACCESS} \n
-        aws_secret_access_key = ${KEY} \n
-        " > aws/credentials
-  else
-    echo 'AWS Credentials already exists' >&2
-  fi
-  
-}
-
-get_secrets(){
-    export AWS_CONFIG_FILE=aws/config
-    export AWS_SHARED_CREDENTIALS_FILE=aws/credentials
-
-  aws secretsmanager get-secret-value --secret-id ${SECRET} --query SecretString --output text --region ${REGION}  --profile ${PROFILE} | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > ${FILE} || { echo 'Failed' ; exit 1; }
-}
-
-completed(){
-
-  if [ -f "${FILE}" ]; then
-
-    if [ ${DEBUG} = true ]; then
-      echo "I Hope you know what you are doing."
-
-      cat ${FILE}
-
-      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      echo "Please delete the pipeline logs."
-      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+setup_authentication() {
+  enable_debug
+  AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:?'AWS_DEFAULT_REGION variable missing.'}
+  if [[ -n "${AWS_OIDC_ROLE_ARN}" ]]; then
+    if [[ -n "${BITBUCKET_STEP_OIDC_TOKEN}" ]]; then
+      oidc_authentication
+    else
+      warning 'Parameter `oidc: true` in the step configuration is required for OIDC authentication'
+      default_authentication
     fi
-
   else
-    echo "Error"
+    default_authentication
   fi
 }
 
-cleaup_credentials(){
-  rm -r aws
-}
+setup_authentication
 
-create_config
-check_variables
-start
-create_credentials
-get_secrets
-cleaup_credentials
-completed
+info "Getting values from Secret Manager..."
+
+# Pipe standard output to /dev/null so run does not echo out secrets
+run aws secretsmanager get-secret-value --region ${AWS_DEFAULT_REGION} --secret-id ${AWS_SECRET_MANAGER} --query SecretString --output text 1> /dev/null
+
+if [[ "${status}" -eq 0 ]]; then
+  for s in $(cat ${output_file} | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
+      echo $s >> $FILE
+  done
+
+  success "Exporting Secret Manager values to ${FILE} successful."
+else
+  fail "Getting Secret Manager values failed."
+fi
+
+
+
+
+
+
