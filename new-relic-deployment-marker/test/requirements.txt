@@ -1,0 +1,6 @@
+pytest==7.*
+pytest-mock
+cerberus
+requests
+bitbucket-pipes-toolkit
+PyYAML
