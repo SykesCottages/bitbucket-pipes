@@ -2,7 +2,7 @@
 Mark new deployments in New Relic with this Bitbucket Pipe
 
 ## Important
-If you do not follow the new relic naming convention the deployment market might not work. Make sure you're following the naming convention when generating an APM.
+If you do not follow the new relic naming convention the deployment marker might not work. Make sure you're following the naming convention when generating an APM.
 
 ## YAML Definition
 ### Variables
