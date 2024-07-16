@@ -89,17 +89,18 @@ class V1Deployment(DeploymentRunner):
     def run(self) -> None:
         logger.info("Starting New Relic Deployment with v1 schema")
         
-        app_id = self.config.get('NEW_RELIC_APPLICATION_ID')
+        app_ids = self.config.get('NEW_RELIC_APPLICATION_ID').split(',')
         user = self.config.get('DEPLOYMENT_USER')
         revision = self.config.get('DEPLOYMENT_REVISION')
         description = "Deployed new version with v1 schema"
 
-        try:
-            self.client.create_deployment_marker(app_id, user, revision, description)
-            logger.info(f"Deployment marker created for Application ID {app_id} with v1 schema")
-        except requests.RequestException as e:
-            logger.error(f"Error creating deployment marker for Application ID {app_id}: {str(e)}")
-            raise
+        for app_id in app_ids:
+            try:
+                self.client.create_deployment_marker(app_id, user, revision, description)
+                logger.info(f"Deployment marker created for Application ID {app_id} with v1 schema")
+            except requests.RequestException as e:
+                logger.error(f"Error creating deployment marker for Application ID {app_id}: {str(e)}")
+                raise
 
 class V2Deployment(DeploymentRunner):
     def run(self) -> None:
