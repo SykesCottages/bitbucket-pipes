@@ -12,7 +12,7 @@ If you do not follow the new relic naming convention the deployment marker might
 | NEW_RELIC_API_KEY (*) | New Relic API Key |
 | APPLICATION_NAME (*)  | The name of the application in New Relic to find the ID  |
 | ENVIRONMENT(*)        | Environment name where the deployment is taking place (e.g., production, staging). |
-| COMPONENT_TYPE (*)    | The component type of the application in New Relic. Valid options are Web, Cmd, and Cron.|
+| COMPONENT_TYPE (*)    | The application component type in New Relic. Valid options are Web, Cmd, and Cron.|
 | DEPLOYMENT_REVISION (*)| The revision or the deployment ID to mark in NR|
 | DEPLOYMENT_USER     | User responsible for this deployment, defaults to bitbucket.pipeline |
 (*) = required variable. This variable needs to be specified always when using the pipe.
