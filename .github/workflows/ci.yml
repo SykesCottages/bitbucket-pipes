@@ -33,7 +33,7 @@ jobs:
 
       - name: Run tests
         run: |
-          ls
+          cd new-relic-deployment-marker
           python -m pytest -p no:cacheprovider test/test_unit.py --verbose --capture=no
 
   build-and-push-docker:
