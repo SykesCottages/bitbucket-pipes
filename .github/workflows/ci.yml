@@ -33,6 +33,7 @@ jobs:
 
       - name: Run tests
         run: |
+          ls
           python -m pytest -p no:cacheprovider test/test_unit.py --verbose --capture=no
 
   build-and-push-docker:
