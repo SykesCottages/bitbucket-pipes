@@ -8,7 +8,7 @@ on:
       - 'new-relic-deployment-marker/**'
   pull_request:
     branches:
-      - main
+      - '*'
     paths:
       - 'new-relic-deployment-marker/**'
 
