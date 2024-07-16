@@ -1,5 +1,10 @@
-FROM newrelic/cli:latest
+FROM python:3.11-slim
 
-COPY pipe.sh /
+COPY requirements.txt /
+WORKDIR /
 
-ENTRYPOINT [ "/pipe.sh" ]
+RUN pip install --no-cache-dir -r requirements.txt
+COPY pipe /
+COPY pipe.yml .
+
+CMD ["python3", "/pipe.py"]

@@ -1,0 +1,19 @@
+version: '3.9' 
+
+services:
+  pipe:
+    build: . 
+    environment:
+      - PYTHONUNBUFFERED=1  
+    env_file:
+      - .env 
+    volumes:
+      - ./pipe/pipe.py:/pipe.py
+  test:
+    build:
+      context: .
+      dockerfile: test/Dockerfile
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: python -m pytest -p no:cacheprovider test/test_unit.py --verbose --capture=no
