@@ -27,11 +27,14 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd new-relic-deployment-marker
           python -m pip install --upgrade pip
-          pip install --no-cache-dir -r test/requirements.txt
+          pip install --no-cache-dir -r requirements.txt
 
       - name: Run tests
-        run: pytest -p no:cacheprovider test/test_unit.py --verbose --capture=no
+        run: |
+          cd new-relic-deployment-marker
+          pytest -p no:cacheprovider test/test_unit.py --verbose --capture=no
 
   build-and-push-docker:
     runs-on: ubuntu-latest
