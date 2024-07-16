@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch, Mock
+import requests_mock
 import os
 from pipe.pipe import Config, NewRelicClient, V1Deployment, V2Deployment, NewRelicDeploymentPipe, v1_schema, v2_schema
 
@@ -104,6 +105,61 @@ class TestNewRelicDeploymentPipe(unittest.TestCase):
             pipe = NewRelicDeploymentPipe(v2_schema, {}, mock_v2_deployment_class)
             self.assertIsInstance(pipe.deployment, V2Deployment)
 
+class TestNewRelicDeploymentIntegration(unittest.TestCase):
+    @patch.dict(os.environ, {
+        'NEW_RELIC_API_KEY': '12345',
+        'NEW_RELIC_APPLICATION_ID': '670454875,670457807,670457807,670436027,670452035,670456380,670456055,670251708',
+        'DEPLOYMENT_REVISION': 'rev123',
+        'DEPLOYMENT_USER': 'test_user'
+    })
+    @requests_mock.Mocker()
+    def test_v1_deployment(self, mock_requests):
+        """Integration test for V1 deployment with multiple application IDs."""
+        # The application endpoint needs mocking so a offline test can be made.
+        app_ids = ['670454875', '670457807', '670457807', '670436027', '670452035', '670456380', '670456055', '670251708']
+        for app_id in app_ids:
+            mock_requests.post(f'https://api.newrelic.com/v2/applications/{app_id}/deployments.json', status_code=201)
+    
+        # Because we don't use versioning for the images metadate can be blank.
+        pipe = NewRelicDeploymentPipe(v1_schema, {}, V1Deployment)
+        pipe.run()
+    
+        for app_id in app_ids:
+            url = f'https://api.newrelic.com/v2/applications/{app_id}/deployments.json'
+            self.assertTrue(mock_requests.called)
+            self.assertEqual(mock_requests.call_count, len(app_ids))
+            self.assertTrue(mock_requests.request_history)
+            self.assertTrue(any(req.url == url for req in mock_requests.request_history))
+
+    @patch.dict(os.environ, {
+        'NEW_RELIC_API_KEY': '12345',
+        'APPLICATION_NAME': 'MyApp',
+        'COMPONENT_TYPE': 'backend',
+        'ENVIRONMENT': 'production',
+        'SHORT_REGION': 'us-west-2',
+        'DEPLOYMENT_REVISION': 'rev123',
+        'DEPLOYMENT_USER': 'test_user'
+    })
+    @requests_mock.Mocker()
+    def test_v2_deployment(self, mock_requests):
+        """Integration test for V2 deployment."""
+        # The application endpoint needs mocking so a offline test can be made.
+        mock_requests.get('https://api.newrelic.com/v2/applications.json',
+                          json={'applications': [{'id': 'app_id_1', 'name': 'MyApp'}]})
+
+        mock_requests.post('https://api.newrelic.com/v2/applications/app_id_1/deployments.json', status_code=201)
+
+        # Because we don't use versioning for the images metadate can be blank.
+        pipe = NewRelicDeploymentPipe(v2_schema, {}, V2Deployment)
+        pipe.run()
+
+        self.assertTrue(mock_requests.called)
+        self.assertEqual(mock_requests.call_count, 2)
+        self.assertTrue(mock_requests.request_history)
+        self.assertEqual(mock_requests.request_history[0].url,
+                         'https://api.newrelic.com/v2/applications.json?filter%5Bname%5D=%25MyApp%25production%25us-west-2%25backend')
+        self.assertEqual(mock_requests.request_history[1].url,
+                         'https://api.newrelic.com/v2/applications/app_id_1/deployments.json')
 
 if __name__ == '__main__':
     unittest.main()
