@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+git config --global --add safe.directory /opt/atlassian/pipelines/agent/build
+
 DIFF_FROM_MASTER=$(git rev-list --left-right --count HEAD...origin/master|awk '{print $2}')
 
 echo "----------------------------------------------------------------------------------------------------"
