@@ -13,7 +13,7 @@ echo "--------------------------------------------------------------------------
 if [ "$DIFF_FROM_MASTER" -gt "0" ]; then
     echo "| Your build has failed because $BRANCH_NAME has $DIFF_FROM_MASTER more changes than your current branch |"
     echo "|                                                                                                  |"
-    echo "| You need to run 'git pull origin $BRANCH_NAME' on your branch!                                         |"
+    echo "| You need to run 'git pull origin ${BRANCH_NAME#*/}' on your branch!                                         |"
     echo "----------------------------------------------------------------------------------------------------"
     exit 1
 else
