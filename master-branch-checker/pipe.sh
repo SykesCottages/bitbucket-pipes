@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -eo pipefail
 
 git config --global --add safe.directory /opt/atlassian/pipelines/agent/build
 
