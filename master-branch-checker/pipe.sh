@@ -1,8 +1,9 @@
 #!/bin/sh
 set -e
 
-BRANCH_NAME=$(git remote show origin | grep "HEAD" | cut -d: -f2 | tr -d ' ')
+git config --global --add safe.directory /opt/atlassian/pipelines/agent/build
 
+BRANCH_NAME=$(git remote show origin | grep "HEAD" | cut -d: -f2 | tr -d ' ')
 DIFF_FROM_MASTER=$(git rev-list --left-right --count HEAD...origin/$BRANCH_NAME|awk '{print $2}')
 
 echo "----------------------------------------------------------------------------------------------------"
