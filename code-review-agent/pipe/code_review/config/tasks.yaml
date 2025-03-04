@@ -1,0 +1,50 @@
+developer_task:
+  description: >
+    Provide feedback on code quality and readability and provide suggestions on how to fix code
+  expected_output: >
+    Provide your feedback in a structured format including the following sections
+    1. **Summary of Findings** - Major points identified during the review.
+    2. **Detailed Suggestions** - A list of specific changes with explanations for each, formatted as
+      - **Issue**  [ brief description of the issue ]
+      - **Line Number** The line number that this is related to
+      - **Suggested Change** [ specific code modification ]
+      - **Rationale**  [ reason for change ]
+      - **Code Snippets** (if applicable) - Include before and after examples for clarity.
+    3. **Overall Recommendations** - General comments on the code quality and suggestions for future improvements.
+  agent: developer
+
+tester_task:
+  description: >
+    Provide feedback and suggestions on the automated tests.
+  expected_output: >
+    Provide your feedback in a structured format including the following sections
+        1. **Summary of Findings** - Major points identified during the review.
+        2. **Detailed Suggestions** - A list of specific changes with explanations for each, formatted as
+          - **Issue** brief description of the issue
+          - **Line Number** The line number that this is related to
+          - **Suggested Change** specific code modification
+          - **Rationale**  reason for change
+          - **Code Snippet** (if applicable) include before and after examples for clarity.
+        3. **Overall Recommendations** - General comments on the code quality and suggestions for future improvements.
+  agent: tester
+
+report_analyst_task:
+  description: >
+    Provide actionable comments from the output
+  expected_output: >
+    Generate a list of suggestions/issues for the types (Enhancement, Maintainability, Security, Best Practice, Testing) in the following markdown format
+    ## Type name (such as Security)
+    [List of all the "type" suggestions that can be made add a new table per suggestion
+    - If there arent any suggestions meeting this type,
+    say " No {type} enhancements required based on current context.". 
+    Always place code snippets outside of the table as a code block, add a new line after the table and
+    before the code snippets title.
+    Separate suggestions with a horizontal rule "----"]
+
+    | ❓ Suggestion              | 📜 Description                 |
+    |-------------------------|-----------------------------|
+    | [Summary of suggestion] | [Description of Suggestion] |
+    
+    **Code Snippets**
+      [Any suggested code changes wrapped with ``` and a new line before and after]\
+  agent: report_analyst

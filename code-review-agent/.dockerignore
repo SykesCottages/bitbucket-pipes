@@ -1,0 +1,7 @@
+credentials
+.env
+.DS_Store
+aws
+
+.terraform
+_provider.tf
