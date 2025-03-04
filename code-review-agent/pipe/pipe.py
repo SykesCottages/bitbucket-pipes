@@ -102,7 +102,7 @@ class CodeReviewPipe(Pipe):
         last_pull_request_build = self.bitbucket_client.get_last_pull_request_build(pull_reqeust['source']['branch']['name'])
 
         # If we've had no build prior to this one, review the entire PR - If not, then only review non merge commits
-        if last_pull_request_build is not None:
+        if last_pull_request_build is None:
             self.log_info(f"Pull Request has no previous build, going to do a full review of pull request: {pull_request_id}")
             diff_to_review = self.bitbucket_client.get_pull_request_diffs(pull_request_id)
         else:
