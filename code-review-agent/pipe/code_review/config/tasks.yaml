@@ -32,19 +32,17 @@ report_analyst_task:
   description: >
     Provide actionable comments from the output
   expected_output: >
-    Generate a list of suggestions/issues for the types (Enhancement, Maintainability, Security, Best Practice, Testing) in the following markdown format
-    ## Type name (such as Security)
-    [List of all the "type" suggestions that can be made add a new table per suggestion
-    - If there arent any suggestions meeting this type,
-    say " No {type} enhancements required based on current context.". 
-    Always place code snippets outside of the table as a code block, add a new line after the table and
-    before the code snippets title.
+    Generate a list of suggestions/issues in the following markdown format
+
+    [List of all the suggestions/issues that can be made add a new table per suggestion/issue. 
+    Always place code snippets outside of the table as a code block, add a new line
+    after the table and before the code snippets title.
     Separate suggestions with a horizontal rule "----"]
 
     | ❓ Suggestion              | 📜 Description                 |
     |-------------------------|-----------------------------|
     | [Summary of suggestion] | [Description of Suggestion] |
     
-    **Code Snippets**
+    **Code Example**
       [Any suggested code changes wrapped with ``` and a new line before and after]\
   agent: report_analyst
