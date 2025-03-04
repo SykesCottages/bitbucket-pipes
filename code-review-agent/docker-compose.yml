@@ -1,0 +1,18 @@
+services:
+  pipe:
+    build: . 
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./pipe/pipe.py:/pipe.py
+      - ./pipe/code_review:/code_review
+    env_file:
+      - .env
+  test:
+    build:
+      context: .
+      dockerfile: test/Dockerfile
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: python -m pytest -p no:cacheprovider test/test_unit.py --verbose --capture=no

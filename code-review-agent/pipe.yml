@@ -1,0 +1,21 @@
+name: "Code Review Agent"
+description: "Unlock AI's power for code review of pull requests."
+category: "Code quality"
+variables:
+  - name: OPENAI_API_KEY
+    default: "$OPENAI_API_KEY"
+  - name: BITBUCKET_ACCESS_TOKEN
+    default: "$BITBUCKET_ACCESS_TOKEN"
+  - name: MODEL
+    default: "gpt-4o-mini"
+repository: https://github.com/SykesCottages/bitbucket-pipes
+vendor:
+  name: OpenAI
+  website: https://openai.com/
+maintainer:
+  name: Sykes Cottages
+  website: https://www.sykescottages.co.uk/
+tags:
+  - AI
+  - code-quality
+  - code-review
