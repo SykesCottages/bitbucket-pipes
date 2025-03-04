@@ -165,7 +165,7 @@ class CodeReviewPipe(Pipe):
 
         self.bitbucket_client.add_comment(pull_request_id, payload)
 
-        return True
+        return 1
 
 if __name__ == '__main__':
     with open('/pipe.yml', 'r') as metadata_file:
