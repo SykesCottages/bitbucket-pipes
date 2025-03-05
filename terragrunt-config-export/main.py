@@ -4,44 +4,51 @@ import os
 import sys
 import boto3
 import yaml
-from datetime import datetime
+import time
+import stat
+import configparser
+
+
+def auth_oidc():
+    random_number = str(time.time_ns())
+    aws_config_directory = os.path.join(os.environ["HOME"], '.aws')
+    oidc_token_directory = os.path.join(aws_config_directory, '.aws-oidc')
+
+    os.makedirs(aws_config_directory, exist_ok=True)
+    os.makedirs(oidc_token_directory, exist_ok=True)
+
+    web_identity_token_path = os.path.join(oidc_token_directory, f'oidc_token_{random_number}')
+    with open(web_identity_token_path, 'w') as f:
+        f.write(os.getenv('BITBUCKET_STEP_OIDC_TOKEN'))
+
+    os.chmod(web_identity_token_path, mode=stat.S_IRUSR)
+    print('Web identity token file is created')
+
+    aws_configfile_path = os.path.join(aws_config_directory, 'config')
+    with open(aws_configfile_path, 'w') as configfile:
+        config = configparser.ConfigParser()
+        config['default'] = {
+            'role_arn': os.getenv('\fi'),
+            'web_identity_token_file': web_identity_token_path
+        }
+        config.write(configfile)
+    print('Configured settings for authentication with assume web identity role')
+
 
 def get_boto3_client(service_name='ecs'):
     """
     Create and return a boto3 client with appropriate authentication.
     """
-    region = os.environ.get('AWS_REGION', os.environ.get('AWS_DEFAULT_REGION', 'eu-west-1'))
-    profile_name = os.environ.get('AWS_PROFILE')
-    role_arn = os.environ.get('AWS_ROLE_ARN')
+    region = os.getenv('AWS_REGION', os.getenv('AWS_DEFAULT_REGION', 'eu-west-1'))
+    profile_name = os.getenv('AWS_PROFILE')
+    oidc = os.getenv('AWS_OIDC_ROLE_ARN')
 
-    if role_arn:
-        # Create an STS client to assume the role
-        sts_client = boto3.client('sts', region_name=region)
-
-        # Assume the role
-        response = sts_client.assume_role(
-            RoleArn=role_arn,
-            RoleSessionName=f"ECSContainerDefinitionsPipe-{datetime.now().strftime('%Y%m%d%H%M%S')}"
-        )
-
-        # Extract temporary credentials
-        credentials = response['Credentials']
-
-        # Create a new session with the assumed role credentials
-        return boto3.client(
-            service_name,
-            region_name=region,
-            aws_access_key_id=credentials['AccessKeyId'],
-            aws_secret_access_key=credentials['SecretAccessKey'],
-            aws_session_token=credentials['SessionToken']
-        )
+    if oidc:
+        auth_oidc()
+        return boto3.client(service_name,region_name=region)
     elif profile_name:
-        # Use the specified AWS profile (including SSO profiles)
         session = boto3.Session(profile_name=profile_name)
         return session.client(service_name, region_name=region)
-    else:
-        # Standard credentials (from environment or instance profile)
-        return boto3.client(service_name, region_name=region)
 
 
 def convert_to_terragrunt_format(task_definition, service_name):
@@ -51,7 +58,7 @@ def convert_to_terragrunt_format(task_definition, service_name):
     # Initialize the terragrunt config structure
     config = {
         "deployment": {
-            "extraEnv": os.environ.get('EXTRA_ENV', [])
+            "extraEnv": os.getenv('EXTRA_ENV', [])
         },
         "terragruntConfig": {
             "name": f"({service_name})",
@@ -59,8 +66,8 @@ def convert_to_terragrunt_format(task_definition, service_name):
             "containers": [],
             "mainContainerName": "",
             "resources": [],
-            "endpoints": os.environ.get('ENDPOINTS', []),
-            "iamRole": os.environ.get('IAM_ROLE', "")
+            "endpoints": os.getenv('ENDPOINTS', []),
+            "iamRole": os.getenv('IAM_ROLE', "")
         }
     }
 
@@ -121,8 +128,8 @@ def get_container_definitions():
     Get container definitions from ECS service
     """
     # Required parameters
-    cluster = os.environ.get('ECS_CLUSTER')
-    service = os.environ.get('ECS_SERVICE')
+    cluster = os.getenv('ECS_CLUSTER')
+    service = os.getenv('ECS_SERVICE')
 
     # Validate required parameters
     if not cluster:
@@ -166,10 +173,10 @@ def get_container_definitions():
         output_content = yaml.dump(response, default_flow_style=False, sort_keys=False)
 
         # Write to file if specified
-        if os.environ.get('OUTPUT_FILE'):
-            with open(os.environ.get('OUTPUT_FILE'), 'w') as f:
+        if os.getenv('OUTPUT_FILE'):
+            with open(os.getenv('OUTPUT_FILE'), 'w') as f:
                 f.write(output_content)
-            print(f"Output written to {os.environ.get('OUTPUT_FILE')}")
+            print(f"Output written to {os.getenv('OUTPUT_FILE')}")
         else:
             print(output_content)
 

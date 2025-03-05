@@ -13,6 +13,9 @@ variables:
   ECS_SERVICE:
     description: Name of the ECS service
     required: true
+  AWS_OIDC_ROLE_ARN:
+    description: ARN of IAM OIDC Role to assume
+    required: true
   EXTRA_ENV:
     type: Map
     required: false
@@ -26,9 +29,6 @@ variables:
     required: false
   OUTPUT_FILE:
     description: File to write the output to (if not specified, outputs to console)
-    required: false
-  AWS_ROLE_ARN:
-    description: ARN of IAM role to assume (optional)
     required: false
   AWS_PROFILE:
     description: Profile to assume when running locally
