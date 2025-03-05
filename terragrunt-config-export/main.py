@@ -74,9 +74,9 @@ def convert_to_terragrunt_format(task_definition, service_name):
         },
         "terragruntConfig": {
             "name": f"({service_name})",
-            "secrets": [],
+            "secretName": "",
             "containers": [],
-            "mainContainerName": "",
+            "mainContainerName": os.getenv("MAIN_CONTAINER_NAME", ""),
             "resources": [],
             "endpoints": endpoints_list,
             "iamRole": os.getenv('IAM_ROLE', "")
@@ -99,10 +99,9 @@ def convert_to_terragrunt_format(task_definition, service_name):
         if "secrets" in container:
             for secret in container["secrets"]:
                 secret_name = secret.get("valueFrom", "").split(":")[-1].rsplit("-", 1)[0]
-                if secret_name not in config["terragruntConfig"]["secrets"]:
-                    config["terragruntConfig"]["secrets"].append(
-                        secret_name
-                    )
+                if secret_name not in config["terragruntConfig"]["secretName"] and secret.get("name", "") != "SHAREDSECRETS":
+                    config["terragruntConfig"]["secretName"] = secret_name
+
 
         # Process environment variables
         if "environment" in container:

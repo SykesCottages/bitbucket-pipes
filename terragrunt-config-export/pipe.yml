@@ -16,6 +16,9 @@ variables:
   AWS_OIDC_ROLE_ARN:
     description: ARN of IAM OIDC Role to assume
     required: true
+  MAIN_CONTAINER_NAME:
+    description: The name of the main container used for routing
+    required: true
   EXTRA_ENV:
     type: Map
     required: false
