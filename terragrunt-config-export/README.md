@@ -40,7 +40,7 @@ Add the following to your `bitbucket-pipelines.yml` file:
 ### Basic Usage
 
 ```yaml
-- pipe: your-docker-registry/ecs-container-definitions-pipe:latest
+- pipe: sykescottages/bitbucket-pipes:terragrunt-config-export
   variables:
     ECS_CLUSTER: 'my-ecs-cluster'
     ECS_SERVICE: 'my-ecs-service'
@@ -53,7 +53,7 @@ Add the following to your `bitbucket-pipelines.yml` file:
 - step:
     name: Extract ECS Configuration
     script:
-      - pipe: your-docker-registry/ecs-container-definitions-pipe:latest
+      - pipe: sykescottages/bitbucket-pipes:terragrunt-config-export
         variables:
           ECS_CLUSTER: 'my-ecs-cluster'
           ECS_SERVICE: 'my-ecs-service'
