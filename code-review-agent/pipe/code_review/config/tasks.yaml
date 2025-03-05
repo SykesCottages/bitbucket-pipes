@@ -32,7 +32,8 @@ report_analyst_task:
   description: >
     Provide actionable comments from the output
   expected_output: >
-    Generate a list of suggestions/issues in the following markdown format
+    Generate a list of suggestions/issues in the following markdown format. Limit to the max allowed comments, if the 
+    suggestions are less than the max allowed then output all of them.
 
     [List of all the suggestions/issues that can be made add a new table per suggestion/issue. 
     Always place code snippets outside of the table as a code block, add a new line

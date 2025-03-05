@@ -1,6 +1,6 @@
-import yaml
 from crewai import Agent, Crew, Process, Task
-from crewai.project import CrewBase, agent, crew, task, output_json
+from crewai.knowledge.source.string_knowledge_source import StringKnowledgeSource
+from crewai.project import CrewBase, agent, crew, task
 from pydantic import BaseModel
 
 
@@ -59,11 +59,24 @@ class CodeReview():
 		)
 
 	@crew
-	def crew(self) -> Crew:
+	def crew(self, knowledge_source_file=None) -> Crew:
+
+		knowledge_sources = []
+		if knowledge_source_file is not None:
+			with open(knowledge_source_file, 'r') as file:
+				data = file.read().rstrip()
+
+			knowledge_sources.append(
+				StringKnowledgeSource(
+					content=data
+				)
+			)
+
 		return Crew(
 			agents=self.agents,
 			tasks=self.tasks,
 			process=Process.sequential,
 			verbose=False,
-			share_crew=False
+			share_crew=False,
+			knowledge_sources=knowledge_sources,
 		)
