@@ -34,7 +34,6 @@ def auth_oidc():
         config.write(configfile)
     print('Configured settings for authentication with assume web identity role')
 
-
 def get_boto3_client(service_name='ecs'):
     """
     Create and return a boto3 client with appropriate authentication.
@@ -49,7 +48,6 @@ def get_boto3_client(service_name='ecs'):
     elif profile_name:
         session = boto3.Session(profile_name=profile_name)
         return session.client(service_name, region_name=region)
-
 
 def convert_to_terragrunt_format(task_definition, service_name):
     """
