@@ -53,10 +53,24 @@ def convert_to_terragrunt_format(task_definition, service_name):
     """
     Convert ECS task definition to the required Terragrunt format.
     """
+
+    extra_env_str = os.getenv('EXTRA_ENV', '')
+    try:
+        extra_env = yaml.safe_load(extra_env_str) if extra_env_str else {}
+    except yaml.YAMLError:
+        extra_env = {}
+
+    endpoints = os.getenv('ENDPOINTS', '')
+    try:
+        endpoints_list = yaml.safe_load(endpoints) if endpoints else []
+    except yaml.YAMLError:
+        endpoints_list = []
+
+
     # Initialize the terragrunt config structure
     config = {
         "deployment": {
-            "extraEnv": os.getenv('EXTRA_ENV', [])
+            "extraEnv": extra_env
         },
         "terragruntConfig": {
             "name": f"({service_name})",
@@ -64,7 +78,7 @@ def convert_to_terragrunt_format(task_definition, service_name):
             "containers": [],
             "mainContainerName": "",
             "resources": [],
-            "endpoints": os.getenv('ENDPOINTS', []),
+            "endpoints": endpoints_list,
             "iamRole": os.getenv('IAM_ROLE', "")
         }
     }

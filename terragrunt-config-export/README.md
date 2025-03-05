@@ -59,7 +59,7 @@ Add the following to your `bitbucket-pipelines.yml` file:
           ECS_SERVICE: 'my-ecs-service'
           AWS_OIDC_ROLE_ARN: 'arn:aws:iam::account-id:role/role-name'
           OUTPUT_FILE: 'values.yml'
-      - cat values.yml.json
+      - cat values.yml
 ```
 
 ## Development
@@ -77,6 +77,9 @@ To build and test this pipe locally:
      -v ~/.aws:/root/.aws \
      -e ECS_CLUSTER="ew1-s-hyperion" \
      -e ECS_SERVICE="ew1-s-hyperion-webapp" \
-     -e AWS_PROFILE="staging" \
-     terragrunt-config-export
+     -e AWS_PROFILE=staging \
+     -e ENDPOINTS='["authenticate"]' \
+     -e EXTRA_ENV='{"BASE_URL": "example.com"}' \
+     -e IAM_ROLE="arn:aws:iam::account-id:role/role-name" \
+      terragrunt-config-export
    ```
