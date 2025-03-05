@@ -1,0 +1,39 @@
+name: Terragrunt config export
+description: Retrieve the config needed for the helm chart from the ECS Service
+image:
+category: Utilities
+repository: https://bitbucket.org/sykescottagesltd/terragrunt-config-export
+vendor:
+  name: Forge Holiday Group
+  website: https://www.forgeholidays.com/
+variables:
+  ECS_CLUSTER:
+    description: Name of the ECS cluster
+    required: true
+  ECS_SERVICE:
+    description: Name of the ECS service
+    required: true
+  EXTRA_ENV:
+    type: Map
+    required: false
+    default: {}
+  ENDPOINTS:
+    type: Array
+    required: false
+    default: []
+  IAM_ROLE:
+    description: The IAM Role for the service
+    required: false
+  OUTPUT_FILE:
+    description: File to write the output to (if not specified, outputs to console)
+    required: false
+  AWS_ROLE_ARN:
+    description: ARN of IAM role to assume (optional)
+    required: false
+  AWS_PROFILE:
+    description: Profile to assume when running locally
+    required: false
+  AWS_REGION:
+    description: AWS region
+    default: "eu-west-1"
+    required: false
