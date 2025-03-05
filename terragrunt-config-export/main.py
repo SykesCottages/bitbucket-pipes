@@ -77,14 +77,14 @@ def convert_to_terragrunt_format(task_definition, service_name):
             "secretName": "",
             "containers": [],
             "mainContainerName": os.getenv("MAIN_CONTAINER_NAME", ""),
-            "resources": [],
+            "resources": {
+                "cpu" : task_definition.get("cpu", 0),
+                "memory" : task_definition.get("memory", 0)
+            },
             "endpoints": endpoints_list,
             "iamRole": os.getenv('IAM_ROLE', "")
         }
     }
-
-    config["terragruntConfig"]['resources'].append({'cpu': task_definition.get("cpu", 0)})
-    config["terragruntConfig"]['resources'].append({'memory': task_definition.get("memory", 0)})
 
     # Process each container definition
     for container in task_definition.get("containerDefinitions", []):
