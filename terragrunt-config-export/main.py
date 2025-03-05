@@ -28,7 +28,7 @@ def auth_oidc():
     with open(aws_configfile_path, 'w') as configfile:
         config = configparser.ConfigParser()
         config['default'] = {
-            'role_arn': os.getenv('\fi'),
+            'role_arn': os.getenv('AWS_OIDC_ROLE_ARN'),
             'web_identity_token_file': web_identity_token_path
         }
         config.write(configfile)
