@@ -16,6 +16,9 @@ schema = {
     'OPENAI_API_KEY': {'type': 'string', 'required': True},
     'BITBUCKET_ACCESS_TOKEN': {'type': 'string', 'required': True},
     'MODEL': {'type': 'string', 'required': True, 'allowed': ['gpt-4o-mini', 'gpt-4o', 'o3-mini', 'o3']},
+    'KNOWLEDGE_FILE_PATH': {'type': 'string', 'required': False},
+    'MAX_INPUT_TOKENS': {'type': 'integer', 'required': False, 'default': 10000},
+    'MAX_SUGGESTIONS': {'type': 'integer', 'required': False, 'default': 10},
 }
 
 class BitbucketApiService:
@@ -136,18 +139,25 @@ class CodeReviewPipe(Pipe):
 
         number_of_tokens = self.num_tokens_from_string(diff_to_review, "o200k_base")
 
-        input_token_limit = 10000
+        input_token_limit = self.get_variable('MAX_INPUT_TOKENS')
         # Check for sensible max tokens, add pipe variable for this
         if number_of_tokens > input_token_limit:
             self.log_warning(f"Max input tokens exceeded limit of {input_token_limit}. Actual count of tokens: {number_of_tokens}.")
             self.success(message='Pipe is stopped.', do_exit=True)
 
+        max_suggestions = self.get_variable('MAX_SUGGESTIONS')
 
         inputs = {
-            'code_to_review': diff_to_review
+            'code_to_review': diff_to_review,
+            'max_suggestion_count': max_suggestions
         }
 
-        output = CodeReview().crew().kickoff(inputs=inputs)
+        self.log_info(
+            f"Generating a max suggestion count of: {max_suggestions}")
+
+        output = (CodeReview()
+                  .crew(knowledge_source_file=self.get_variable('KNOWLEDGE_FILE_PATH'))
+                  .kickoff(inputs=inputs))
 
         self.log_info(f"Tokens Used: {output.token_usage}")
 
