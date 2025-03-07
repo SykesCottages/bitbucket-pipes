@@ -8,6 +8,7 @@ import requests
 from typing import Dict, Any
 
 from bitbucket_pipes_toolkit import Pipe, get_logger, fail
+from snakemd import Document, Table, Inline
 
 from code_review.crew import CodeReview
 
@@ -16,6 +17,11 @@ schema = {
     'OPENAI_API_KEY': {'type': 'string', 'required': True},
     'BITBUCKET_ACCESS_TOKEN': {'type': 'string', 'required': True},
     'MODEL': {'type': 'string', 'required': True, 'allowed': ['gpt-4o-mini', 'gpt-4o', 'o3-mini', 'o3']},
+    'KNOWLEDGE_FILE_PATH': {'type': 'string', 'required': False},
+    'MAX_INPUT_TOKENS': {'type': 'integer', 'required': False, 'default': 10000},
+    'MAX_SUGGESTIONS': {'type': 'integer', 'required': False, 'default': 10},
+    'MIN_SEVERITY_LIMIT': {'type': 'integer', 'required': False, 'default': 0},
+    'SUGGEST_CODE': {'type': 'boolean', 'required': False, 'default': False},
 }
 
 class BitbucketApiService:
@@ -136,25 +142,86 @@ class CodeReviewPipe(Pipe):
 
         number_of_tokens = self.num_tokens_from_string(diff_to_review, "o200k_base")
 
-        input_token_limit = 10000
+        input_token_limit = self.get_variable('MAX_INPUT_TOKENS')
         # Check for sensible max tokens, add pipe variable for this
         if number_of_tokens > input_token_limit:
             self.log_warning(f"Max input tokens exceeded limit of {input_token_limit}. Actual count of tokens: {number_of_tokens}.")
             self.success(message='Pipe is stopped.', do_exit=True)
 
-
+        max_suggestions = self.get_variable('MAX_SUGGESTIONS')
+        min_severity_limit = self.get_variable('MIN_SEVERITY_LIMIT')
         inputs = {
-            'code_to_review': diff_to_review
+            'code_to_review': diff_to_review,
+            'max_suggestion_count': max_suggestions,
+            'min_severity_limit': min_severity_limit
         }
 
-        output = CodeReview().crew().kickoff(inputs=inputs)
+        self.log_info(
+            f"Generating a max suggestion count of: {max_suggestions}")
+
+        output = (CodeReview()
+                  .crew(knowledge_source_file=self.get_variable('KNOWLEDGE_FILE_PATH'))
+                  .kickoff(inputs=inputs))
 
         self.log_info(f"Tokens Used: {output.token_usage}")
 
-        issues = output.json_dict['issues']
-        added_suggestions = self.add_comment(pull_request_id, issues)
+        # Toggle between formats if the suggest code flag is set
+        if self.get_variable('SUGGEST_CODE'):
+            comment = self.generate_issues_with_code_markdown_table(output.json_dict)
+        else:
+            comment = self.generate_all_issues_markdown_table(output.json_dict)
+
+        added_suggestions = self.add_comment(pull_request_id, comment)
         ui_pull_request_url = f"https://bitbucket.org/{self.workspace}/{self.repo_slug}/pull-requests/{pull_request_id}"
         self.success(message=f"🤖 Successfully added {added_suggestions} comments to the pull request: {ui_pull_request_url} 🤖")
+
+    def generate_all_issues_markdown_table(self, output):
+        doc = Document()
+        doc = self.generate_summary_of_changes(doc, output['summary_of_changes'])
+        header = self.get_table_header()
+        data = []
+        for issue in output['issues']:
+            data.append([
+                issue['title'],
+                issue['file']['full_path'] + "#" + str(issue['file']['new_line']),
+                str(int(issue['severity'])) + " (" + issue['state'] + ")",
+                issue['description'],
+            ])
+
+        doc.add_table(
+            header,
+            data,
+        )
+        return str(doc)
+
+    def generate_issues_with_code_markdown_table(self, output):
+        doc = Document()
+        doc = self.generate_summary_of_changes(doc, output['summary_of_changes'])
+        header = self.get_table_header()
+        for issue in output['issues']:
+            doc.add_table(header, [
+                [
+                    issue['title'],
+                    issue['file']['full_path'] + "#" + str(issue['file']['new_line']),
+                    str(int(issue['severity'])) + " (" + issue['state'] + ")",
+                    issue['description'],
+                ]
+            ])
+            doc.add_heading('Original', 3)
+            doc.add_code(issue['code']['before'])
+
+            doc.add_heading('Recommended Change', 3)
+            doc.add_code(issue['code']['after'])
+
+        return str(doc)
+
+    def generate_summary_of_changes(self, doc: Document, summary):
+        doc.add_heading("Summary of Changes", 3)
+        doc.add_paragraph(summary)
+        return doc
+
+    def get_table_header(self):
+        return ["❓ Suggestion", "📁 Affected File", "🚨 Severity (1-10)", "📜 Description"]
 
     def add_comment(self, pull_request_id, data):
         payload = {

@@ -1,6 +1,6 @@
-import yaml
 from crewai import Agent, Crew, Process, Task
-from crewai.project import CrewBase, agent, crew, task, output_json
+from crewai.knowledge.source.string_knowledge_source import StringKnowledgeSource
+from crewai.project import CrewBase, agent, crew, task
 from pydantic import BaseModel
 
 
@@ -8,9 +8,26 @@ from pydantic import BaseModel
 # you can use the @before_kickoff and @after_kickoff decorators
 # https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
 
-# Define the Pydantic model for the blog
+class CodeChange(BaseModel):
+	before: str
+	after: str
+
+class File(BaseModel):
+	full_path: str
+	new_line: int
+	old_line: int
+
+class Issue(BaseModel):
+	title: str
+	severity: float
+	description: str
+	state: str
+	file: File
+	code: CodeChange
+
 class Review(BaseModel):
-    issues: str
+	summary_of_changes: str
+	issues: list[Issue]
 
 @CrewBase
 class CodeReview():
@@ -22,14 +39,24 @@ class CodeReview():
 	def developer(self) -> Agent:
 		return Agent(
 			config=self.agents_config['developer'],
-			verbose=True
 		)
 
 	@agent
 	def tester(self) -> Agent:
 		return Agent(
 			config=self.agents_config['tester'],
-			verbose=True,
+		)
+
+	@agent
+	def cyber_expert(self) -> Agent:
+		return Agent(
+			config=self.agents_config['cyber_expert'],
+		)
+
+	@agent
+	def triage_agent(self) -> Agent:
+		return Agent(
+			config=self.agents_config['triage_agent'],
 		)
 
 	@agent
@@ -52,6 +79,18 @@ class CodeReview():
 		)
 
 	@task
+	def cyber_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['cyber_task'],
+		)
+
+	@task
+	def triage_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['triage_task'],
+		)
+
+	@task
 	def report_analyst_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['report_analyst_task'],
@@ -59,11 +98,24 @@ class CodeReview():
 		)
 
 	@crew
-	def crew(self) -> Crew:
+	def crew(self, knowledge_source_file=None) -> Crew:
+
+		knowledge_sources = []
+		if knowledge_source_file is not None:
+			with open(knowledge_source_file, 'r') as file:
+				data = file.read().rstrip()
+
+			knowledge_sources.append(
+				StringKnowledgeSource(
+					content=data
+				)
+			)
+
 		return Crew(
 			agents=self.agents,
 			tasks=self.tasks,
 			process=Process.sequential,
 			verbose=False,
-			share_crew=False
+			share_crew=False,
+			knowledge_sources=knowledge_sources,
 		)
