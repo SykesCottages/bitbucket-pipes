@@ -13,9 +13,9 @@ Add the following to your `bitbucket-pipelines.yml` file:
     AWS_OIDC_ROLE_ARN: 'arn:aws:iam::account-id:role/role-name'
     MAIN_CONTAINER_NAME: 'web'
     # Optional variables
-    EXTRA_ENV: #Extra env vars to include in the config
-       BASE_URL: example.com
-    ENDPOINTS: ['authenticate']
+    EXTRA_ENV:'{"BASE_URL": "example.com"}' #Extra env vars to include in the config
+    ENDPOINTS: '["authenticate"]'
+    EXTERNAL_ENDPOINTS: ['authenticate']
     IAM_ROLE: 'arn:aws:iam::account-id:role/role-name'
     AWS_PROFILE: 'staging' 
     OUTPUT_FILE: 'values.yml' 
@@ -82,6 +82,7 @@ To build and test this pipe locally:
      -e ECS_SERVICE="ew1-s-hyperion-webapp" \
      -e AWS_PROFILE=staging \
      -e ENDPOINTS='["authenticate"]' \
+     -e EXTERNAL_ENDPOINTS='["authenticate"]' \
      -e EXTRA_ENV='{"BASE_URL": "example.com"}' \
      -e IAM_ROLE="arn:aws:iam::account-id:role/role-name" \
      -e MAIN_CONTAINER_NAME="web" \
