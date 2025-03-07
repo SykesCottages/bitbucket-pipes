@@ -66,6 +66,12 @@ def convert_to_terragrunt_format(task_definition, service_name):
     except yaml.YAMLError:
         endpoints_list = []
 
+    external_endpoints = os.getenv('EXTERNAL_ENDPOINTS', '')
+    try:
+        external_endpoints_list = yaml.safe_load(external_endpoints) if external_endpoints else []
+    except yaml.YAMLError:
+        external_endpoints_list = []
+
 
     # Initialize the terragrunt config structure
     config = {
@@ -82,6 +88,7 @@ def convert_to_terragrunt_format(task_definition, service_name):
                 "memory" : task_definition.get("memory", 0)
             },
             "endpoints": endpoints_list,
+            "externalEndpoints": external_endpoints_list,
             "iamRole": os.getenv('IAM_ROLE', "")
         }
     }

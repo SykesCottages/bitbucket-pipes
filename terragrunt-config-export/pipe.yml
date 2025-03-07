@@ -27,6 +27,10 @@ variables:
     type: Array
     required: false
     default: []
+  EXTERNAL_ENDPOINTS:
+    type: Array
+    required: false
+    default: [ ]
   IAM_ROLE:
     description: The IAM Role for the service
     required: false
