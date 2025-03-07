@@ -2,3 +2,4 @@ crewai
 bitbucket-pipes-toolkit==4.*
 PyYAML
 tiktoken
+snakemd

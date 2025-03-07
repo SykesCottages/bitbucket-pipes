@@ -2,48 +2,65 @@ developer_task:
   description: >
     Provide feedback on code quality and readability and provide suggestions on how to fix code
   expected_output: >
-    Provide your feedback in a structured format including the following sections
-    1. **Summary of Findings** - Major points identified during the review.
+    If there aren't any issues, then say "No Issues Found", otherwise out provide your feedback in a structured 
+    format including the following sections.
+    1. **Summary of Changes** [Review all files changed and provide a max 140 word summary of what has changed]
     2. **Detailed Suggestions** - A list of specific changes with explanations for each, formatted as
       - **Issue**  [ brief description of the issue ]
       - **Line Number** The line number that this is related to
+      - **Full File Path** The entire file path of the code
       - **Suggested Change** [ specific code modification ]
       - **Rationale**  [ reason for change ]
       - **Code Snippets** (if applicable) - Include before and after examples for clarity.
-    3. **Overall Recommendations** - General comments on the code quality and suggestions for future improvements.
   agent: developer
 
 tester_task:
   description: >
     Provide feedback and suggestions on the automated tests.
   expected_output: >
-    Provide your feedback in a structured format including the following sections
-        1. **Summary of Findings** - Major points identified during the review.
-        2. **Detailed Suggestions** - A list of specific changes with explanations for each, formatted as
-          - **Issue** brief description of the issue
-          - **Line Number** The line number that this is related to
-          - **Suggested Change** specific code modification
-          - **Rationale**  reason for change
-          - **Code Snippet** (if applicable) include before and after examples for clarity.
-        3. **Overall Recommendations** - General comments on the code quality and suggestions for future improvements.
+    If there aren't any testing issues, then say "No Issues Found", otherwise out provide your feedback in a structured 
+    format including the following sections.
+    1. **Detailed Suggestions** - A list of specific changes with explanations for each, formatted as
+      - **Issue** brief description of the issue
+      - **Line Number** The line number that this is related to
+      - **Full File Path** The entire file path of the code
+      - **Suggested Change** specific code modification
+      - **Rationale**  reason for change
+      - **Code Snippet** (if applicable) include before and after examples for clarity.
   agent: tester
+
+cyber_task:
+  description: >
+    Provide feedback and suggestions on the security issues.
+  expected_output: >
+    If there aren't any security issues, then say "No Issues Found", otherwise out provide your feedback in a structured 
+    format including the following sections.
+      1. **Detailed Suggestions** - A list of specific changes with explanations for each, formatted as
+        - **Issue** brief description of the issue
+        - **Line Number** The line number that this is related to
+        - **Full File Path** The entire file path of the code
+        - **Suggested Change** specific code modification
+        - **Rationale**  reason for change
+        - **Code Snippet** (if applicable) include before and after examples for clarity.
+  agent: cyber_expert
+
+triage_task:
+  description: >
+    Review all issues from the previous agents and assign a severity rating.
+  expected_output: >
+    Evaluate all the issues provided and provide feedback in the following format.
+    **Issue** Summary of issue
+    **Severity Rating** [a rating between 1 and 10 of how important the change is. 1 would be a non-important issue and 10 is a critical issue. 
+    When determining this rating, consider the potential impact on the overall system, the likelihood of introducing new bugs or security vulnerabilities 
+    and always refer any predefined knowledge.]
+    **State** Provide a state of either "APPROVED" or "NEEDS REVIEW" base on whether this change is acceptable based on the severity rating. When in doubt, 
+    always err on the side of caution and triage the issue as "NEEDS REVIEW".
+  agent: triage_agent
 
 report_analyst_task:
   description: >
     Provide actionable comments from the output
   expected_output: >
-    Generate a list of suggestions/issues in the following markdown format. Limit to the max allowed comments, if the 
-    suggestions are less than the max allowed then output all of them.
-
-    [List of all the suggestions/issues that can be made add a new table per suggestion/issue. 
-    Always place code snippets outside of the table as a code block, add a new line
-    after the table and before the code snippets title.
-    Separate suggestions with a horizontal rule "----"]
-
-    | ❓ Suggestion              | 📜 Description                 |
-    |-------------------------|-----------------------------|
-    | [Summary of suggestion] | [Description of Suggestion] |
-    
-    **Code Example**
-      [Any suggested code changes wrapped with ``` and a new line before and after]\
+    Generate a list of suggestions and issues with relevant code examples if provided.  Wrap any code functions or variables 
+    with a single ` character, for example `getId()`. Order issues based on the severity, highest first.
   agent: report_analyst

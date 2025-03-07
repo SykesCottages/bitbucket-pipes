@@ -1,6 +1,7 @@
 FROM python:3.12-slim
 
 ENV OTEL_SDK_DISABLED "true"
+ENV ANONYMIZED_TELEMETRY "false"
 
 COPY requirements.txt /
 WORKDIR /
