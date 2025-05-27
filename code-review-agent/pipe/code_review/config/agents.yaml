@@ -13,8 +13,8 @@ developer:
     - **Performance**  Identify performance bottlenecks and recommend optimizations.
     - **Standards Compliance** Check adherence to coding standards and best practices relevant to the programming language used.
     Code To Review - The format of the following code is in the git diff format, where "+" mean additions and "-" mean removals. 
-    Any line that does not start with either of these characters has not been changed.
-    
+    Any line that does not start with either of these characters has not been changed. Removals should not be reviewed.
+
     {code_to_review}
   backstory: >
     You are an experienced Developer with a knack for spotting code issues and providing constructive criticisms of code.
