@@ -12,7 +12,7 @@ source "$(dirname "$0")/common.sh"
 # mandatory parameters
 AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:?'AWS_DEFAULT_REGION variable missing.'}
 AWS_SECRET_NAME=${AWS_SECRET_NAME:?'AWS_SECRET_NAME variable missing.'}
-FILE=${FILE:?'.env'}
+FILE=${FILE:-.env}
 
 
 default_authentication() {
@@ -51,14 +51,15 @@ setup_authentication() {
 setup_authentication
 
 info "Getting values from Secret Manager..."
-
 # Pipe standard output to /dev/null so run does not echo out secrets
 run aws secretsmanager get-secret-value --region ${AWS_DEFAULT_REGION} --secret-id ${AWS_SECRET_NAME} --query SecretString --output text 1> /dev/null
 
 if [[ "${status}" -eq 0 ]]; then
-  for s in $(cat ${output_file} | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
-      echo $s >> $FILE
-  done
+  # Create a new .env file (overwrite any existing one)
+  > ${FILE:-.env}
+  
+  # Process each key-value pair from JSON without single quotes
+  cat ${output_file} | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> ${FILE:-.env}
 
   success "Exporting Secret Manager values to ${FILE} successful."
 else
