@@ -74,6 +74,12 @@ class BitbucketApiService:
         response.raise_for_status()
         return response.json()
 
+    def get_approval(self, pull_request_id):
+        url_comment = f"{self.BITBUCKET_API_BASE_URL}/repositories/{self.workspace}/{self.repo_slug}/pullrequests/{pull_request_id}/approve"
+        response = requests.request("POST", url_comment, auth=self.auth)
+        response.raise_for_status()
+        return response.json()
+
 class CodeReviewPipe(Pipe):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -171,9 +177,22 @@ class CodeReviewPipe(Pipe):
         else:
             comment = self.generate_all_issues_markdown_table(output.json_dict)
 
+        self.make_ai_approval_based_on_severity(output.json_dict, pull_request_id)
         added_suggestions = self.add_comment(pull_request_id, comment)
         ui_pull_request_url = f"https://bitbucket.org/{self.workspace}/{self.repo_slug}/pull-requests/{pull_request_id}"
         self.success(message=f"🤖 Successfully added {added_suggestions} comments to the pull request: {ui_pull_request_url} 🤖")
+
+    def make_ai_approval_based_on_severity(self, output, pull_request_id):
+        approve = True
+
+        for issue in output['issues']:
+            if int(issue['severity']) > 3:
+                approve = False
+
+        if approve:
+            self.bitbucket_client.get_approval(pull_request_id)
+
+        return 1
 
     def generate_all_issues_markdown_table(self, output):
         doc = Document()
