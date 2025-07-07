@@ -80,6 +80,12 @@ class BitbucketApiService:
         response.raise_for_status()
         return response.json()
 
+    def unapprove(self, pull_request_id):
+        url_comment = f"{self.BITBUCKET_API_BASE_URL}/repositories/{self.workspace}/{self.repo_slug}/pullrequests/{pull_request_id}/approve"
+        response = requests.request("DELETE", url_comment, auth=self.auth)
+        response.raise_for_status()
+        return response.json()
+
 class CodeReviewPipe(Pipe):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -191,6 +197,8 @@ class CodeReviewPipe(Pipe):
 
         if approve:
             self.bitbucket_client.get_approval(pull_request_id)
+        else:
+            self.bitbucket_client.unapprove(pull_request_id)
 
         return 1
 
