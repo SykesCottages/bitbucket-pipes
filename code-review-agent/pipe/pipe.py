@@ -1,14 +1,11 @@
 import os
-import re
 
 import tiktoken
 import yaml
 import requests
 
-from typing import Dict, Any
-
 from bitbucket_pipes_toolkit import Pipe, get_logger, fail
-from snakemd import Document, Table, Inline
+from snakemd import Document
 
 from code_review.crew import CodeReview
 
@@ -16,7 +13,7 @@ logger = get_logger()
 schema = {
     'OPENAI_API_KEY': {'type': 'string', 'required': True},
     'BITBUCKET_ACCESS_TOKEN': {'type': 'string', 'required': True},
-    'MODEL': {'type': 'string', 'required': True, 'allowed': ['gpt-4o-mini', 'gpt-4o', 'o3-mini', 'o3', 'gpt-5-mini']},
+    'MODEL': {'type': 'string', 'required': True, 'allowed': ['gpt-4o-mini', 'gpt-4o', 'o3-mini', 'o3', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-5-mini']},
     'KNOWLEDGE_FILE_PATH': {'type': 'string', 'required': False},
     'MAX_INPUT_TOKENS': {'type': 'integer', 'required': False, 'default': 10000},
     'MAX_SUGGESTIONS': {'type': 'integer', 'required': False, 'default': 10},
@@ -44,26 +41,8 @@ class BitbucketApiService:
         else:
             return None  # Return None if the second value does not exist
 
-    def get_pull_request(self, pull_request_id):
-        url_diff = f"{self.BITBUCKET_API_BASE_URL}/repositories/{self.workspace}/{self.repo_slug}/pullrequests/{pull_request_id}"
-        response = requests.request("GET", url_diff, auth=self.auth)
-        response.raise_for_status()
-        return response.json()
-
-    def get_pull_request_commits(self, pull_request_id):
-        url_diff = f"{self.BITBUCKET_API_BASE_URL}/repositories/{self.workspace}/{self.repo_slug}/pullrequests/{pull_request_id}/commits"
-        response = requests.request("GET", url_diff, auth=self.auth)
-        response.raise_for_status()
-        return response.json()
-
-    def get_pull_request_diffs(self, pull_request_id):
-        url_diff = f"{self.BITBUCKET_API_BASE_URL}/repositories/{self.workspace}/{self.repo_slug}/pullrequests/{pull_request_id}/diff"
-        response = requests.request("GET", url_diff, auth=self.auth)
-        response.raise_for_status()
-        return response.text
-
-    def get_commit_diff(self, commit_hash):
-        url_diff = f"{self.BITBUCKET_API_BASE_URL}/repositories/{self.workspace}/{self.repo_slug}/diff/{commit_hash}"
+    def get_pull_request_patch(self, pull_request_id):
+        url_diff = f"{self.BITBUCKET_API_BASE_URL}/repositories/{self.workspace}/{self.repo_slug}/pullrequests/{pull_request_id}/patch"
         response = requests.request("GET", url_diff, auth=self.auth)
         response.raise_for_status()
         return response.text
@@ -104,37 +83,7 @@ class CodeReviewPipe(Pipe):
                 'https://support.atlassian.com/bitbucket-cloud/docs/pipeline-start-conditions/#Pull-Requests'
             )
 
-        pull_reqeust = self.bitbucket_client.get_pull_request(pull_request_id)
-        last_pull_request_build = self.bitbucket_client.get_last_pull_request_build(pull_reqeust['source']['branch']['name'])
-
-        # If we've had no build prior to this one, review the entire PR - If not, then only review non merge commits
-        if last_pull_request_build is None:
-            self.log_info(f"Pull Request has no previous build, going to do a full review of pull request: {pull_request_id}")
-            diff_to_review = self.bitbucket_client.get_pull_request_diffs(pull_request_id)
-        else:
-            self.log_info(
-                f"Pull Request has a previous build, going to do a partial review of pull request: {pull_request_id}")
-
-            last_build_commit = last_pull_request_build['target']['commit']['hash']
-            pull_reqeust_commits = self.bitbucket_client.get_pull_request_commits(pull_request_id)
-            commits_to_review = []
-            for commit in pull_reqeust_commits['values']:
-                if commit['hash'] == last_build_commit:
-                    break
-
-                if len(commit['parents']) > 1:
-                    continue
-
-                commits_to_review.append(commit['hash'])
-
-            # Reverse the commits so we have them in order of oldest first
-            commits_to_review.reverse()
-            diff_to_review = []
-            for commit_to_review in commits_to_review:
-                diff_to_review.append(f"--- Commit Hash: {commit_to_review} ---")
-                diff_to_review.append(self.bitbucket_client.get_commit_diff(commit_to_review))
-
-            diff_to_review = '\n'.join(diff_to_review)
+        diff_to_review = self.bitbucket_client.get_pull_request_patch(pull_request_id)
 
         if not diff_to_review:
             self.log_warning(f"No files for code review.")
