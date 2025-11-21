@@ -16,7 +16,7 @@ logger = get_logger()
 schema = {
     'OPENAI_API_KEY': {'type': 'string', 'required': True},
     'BITBUCKET_ACCESS_TOKEN': {'type': 'string', 'required': True},
-    'MODEL': {'type': 'string', 'required': True, 'allowed': ['gpt-4o-mini', 'gpt-4o', 'o3-mini', 'o3']},
+    'MODEL': {'type': 'string', 'required': True, 'allowed': ['gpt-4o-mini', 'gpt-4o', 'o3-mini', 'o3', 'gpt-5-mini']},
     'KNOWLEDGE_FILE_PATH': {'type': 'string', 'required': False},
     'MAX_INPUT_TOKENS': {'type': 'integer', 'required': False, 'default': 10000},
     'MAX_SUGGESTIONS': {'type': 'integer', 'required': False, 'default': 10},
